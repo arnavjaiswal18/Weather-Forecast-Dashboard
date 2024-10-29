@@ -10,19 +10,26 @@ option = st.selectbox("Select data to view", ("Temperature", "Sky"))
 
 st.subheader(f"{option} for the next {days} days in {place}")
 
+if place:
+    try:
+        # Get temperature/sky data
+        filtered_data = get_data(place, days)
 
-'''def get_data(days):
-    dates = ["2024-10-28", "2024-10-29", "2024-10-30"]
-    temperatures = [13, 12, 15]
-    temperatures = [days * i for i in temperatures]
-    return dates, temperatures'''
+        if option == "Temperature":
+            temperature = [dict["main"]["temp"] / 10 for dict in filtered_data]
+            date = [dict["dt_txt"] for dict in filtered_data]
+            # Create a temperature plot
+            figure = px.line(x=date, y=temperature, labels={"x": "Date", "y": "Temperature(C)"})
+            st.plotly_chart(figure)
 
+        if option == "Sky":
+            images = {"Clear": "images/clear.png", "Clouds": "images/cloud.png",
+                      "Rain": "images/rain.png", "Snow": "images/snow.png"}
+            sky_condition = [dict['weather'][0]["main"] for dict in filtered_data]
+            image_path = [images[condition] for condition in sky_condition]
+            print(sky_condition)
+            st.image(image_path, width=120)
 
-data = get_data(place, days, option)
+    except KeyError:
+        st.text("That place does not exist.")
 
-
-#d, t = get_data(days)  # Put d and t equal to x and y respectively
-
-
-figure = px.line(x=data[0], y=data[1], labels={"x": "Date", "y": "Temperature(C)"})
-st.plotly_chart(figure)
